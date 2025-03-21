@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProjectSpace - Détails du Projet</title>
+    <style>
+        :root {
+            --primary-color: #2e2e2e;
+            --secondary-color: #f7f6f3;
+            --accent-color: #4299e1;
+            --border-color: #e0e0e0;
+            --sidebar-color: #f7f6f3;
+            --text-color: #37352f;
+            --light-text: #888888;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --danger-color: #f56565;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: white;
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 240px;
+            background-color: var(--sidebar-color);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 10px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 0 10px 20px 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .workspace-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+
+        .sidebar-section-title {
+            text-transform: uppercase;
+            font-size: 11px;
+            color: var(--light-text);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            margin-bottom: 2px;
+            border-radius: 3px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .sidebar-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-item.active {
+            background-color: rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+        }
+
+        .sidebar-item-icon {
+            width: 18px;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: #2b6cb0;
+        }
+
+        .btn.danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn.danger:hover {
+            background-color: #c53030;
+        }
+
+        .project-info {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .project-status.en_cours {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .project-status.termine {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .project-status.en_pause {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .project-description {
+            color: var(--text-color);
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tasks-list {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            margin-right: 15px;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .task-meta {
+            font-size: 12px;
+            color: var(--light-text);
+        }
+
+        .messages-list {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .message-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .message-author {
+            font-weight: 500;
+        }
+
+        .message-date {
+            font-size: 12px;
+            color: var(--light-text);
+        }
+
+        .message-content {
+            line-height: 1.6;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: var(--light-text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+        }
+
+        .documents-list {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .document-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .document-item:last-child {
+            border-bottom: none;
+        }
+
+        .document-icon {
+            margin-right: 15px;
+            font-size: 24px;
+        }
+
+        .document-info {
+            flex: 1;
+        }
+
+        .document-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .document-meta {
+            font-size: 12px;
+            color: var(--light-text);
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="workspace-icon">📊</div>
+            <div class="workspace-name">Team Workspace</div>
+        </div>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Workspace</div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📋</div>
+                <a href="./notion-style-pm-platform.html">Dashboard</a>
+                
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📅</div>
+                <a href="./notion-pm-calendar-page.html">Calendar</a>
+                
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📊</div>
+                <a href="./project-details-view.html">Tasks</a>
+                
+            </div>
+            <div class="sidebar-item active">
+                <div class="sidebar-item-icon">💬</div>
+                <a href="./messages-view.html">Messages</a>
+                
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📁</div>
+                <div>Files</div>
+            </div>
+        </div>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Projects</div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">🚀</div>
+                <div>Website Redesign</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📱</div>
+                <div>Mobile App</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">🔍</div>
+                <div>Market Research</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">⚙️</div>
+                <div>Product Development</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <div class="header">
+                <h1 class="header-title">Détails du Projet</h1>
+                <div>
+                    <a href="/projects-view.html" class="btn">Retour aux projets</a>
+                    <button class="btn danger" onclick="deleteProject()">Supprimer le projet</button>
+                </div>
+            </div>
+
+            <div class="project-info">
+                <div id="projectDetails">
+                    <!-- Les détails du projet seront chargés dynamiquement ici -->
+                </div>
+                <button class="btn" onclick="openEditProjectModal()">Modifier le projet</button>
+            </div>
+
+            <div class="tasks-list">
+                <div class="section-title">
+                    Tâches
+                    <button class="btn" style="float: right;" onclick="openCreateTaskModal()">Nouvelle tâche</button>
+                </div>
+                <div id="tasksList">
+                    <!-- Les tâches seront chargées dynamiquement ici -->
+                </div>
+            </div>
+
+            <div class="messages-list">
+                <div class="section-title">
+                    Messages
+                    <button class="btn" style="float: right;" onclick="openCreateMessageModal()">Nouveau message</button>
+                </div>
+                <div id="messagesList">
+                    <!-- Les messages seront chargés dynamiquement ici -->
+                </div>
+            </div>
+
+            <div class="documents-list">
+                <div class="section-title">
+                    Documents
+                    <button class="btn" style="float: right;" onclick="openUploadDocumentModal()">Ajouter un document</button>
+                </div>
+                <div id="documentsList">
+                    <!-- Les documents seront chargés dynamiquement ici -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de modification du projet -->
+        <div id="editProjectModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Modifier le projet</h2>
+                    <span class="close-modal" onclick="closeEditProjectModal()">&times;</span>
+                </div>
+                <form id="editProjectForm">
+                    <div class="form-group">
+                        <label class="form-label">Titre du projet</label>
+                        <input type="text" name="title" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-input" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Statut</label>
+                        <select name="status" class="form-input" required>
+                            <option value="en_cours">En cours</option>
+                            <option value="termine">Terminé</option>
+                            <option value="en_pause">En pause</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Enregistrer les modifications</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal de création de tâche -->
+        <div id="createTaskModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Nouvelle tâche</h2>
+                    <span class="close-modal" onclick="closeCreateTaskModal()">&times;</span>
+                </div>
+                <form id="createTaskForm">
+                    <div class="form-group">
+                        <label class="form-label">Titre de la tâche</label>
+                        <input type="text" name="title" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-input" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date d'échéance</label>
+                        <input type="date" name="due_date" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn">Créer la tâche</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal de création de message -->
+        <div id="createMessageModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Nouveau message</h2>
+                    <span class="close-modal" onclick="closeCreateMessageModal()">&times;</span>
+                </div>
+                <form id="createMessageForm">
+                    <div class="form-group">
+                        <label class="form-label">Message</label>
+                        <textarea name="content" class="form-input" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn">Envoyer le message</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal d'upload de document -->
+        <div id="uploadDocumentModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Ajouter un document</h2>
+                    <span class="close-modal" onclick="closeUploadDocumentModal()">&times;</span>
+                </div>
+                <form id="uploadDocumentForm">
+                    <div class="form-group">
+                        <label class="form-label">Titre du document</label>
+                        <input type="text" name="title" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fichier</label>
+                        <input type="file" name="file" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn">Téléverser le document</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/js/api.js"></script>
+    <script>
+        // Vérifier l'authentification
+        checkAuth();
+
+        // Récupérer l'ID du projet depuis l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('id');
+
+        if (!projectId) {
+            window.location.href = '/projects-view.html';
+        }
+
+        // Charger les données du projet
+        loadProjectDetails();
+        loadProjectTasks();
+        loadProjectMessages();
+        loadProjectDocuments();
+
+        async function loadProjectDetails() {
+            try {
+                const response = await API.getProject(projectId);
+                if (response.status === 200) {
+                    const project = response.data;
+                    document.getElementById('projectDetails').innerHTML = `
+                        <div class="project-status ${project.status}">${getStatusLabel(project.status)}</div>
+                        <h2>${project.title}</h2>
+                        <p class="project-description">${project.description}</p>
+                        <div class="project-meta">
+                            <p>Créé le: ${new Date(project.created_at).toLocaleDateString()}</p>
+                            <p>Dernière modification: ${new Date(project.updated_at).toLocaleDateString()}</p>
+                        </div>
+                    `;
+
+                    // Pré-remplir le formulaire de modification
+                    const form = document.getElementById('editProjectForm');
+                    form.querySelector('[name="title"]').value = project.title;
+                    form.querySelector('[name="description"]').value = project.description;
+                    form.querySelector('[name="status"]').value = project.status;
+                }
+            } catch (error) {
+                console.error('Erreur de chargement des détails du projet:', error);
+                alert('Erreur lors du chargement des détails du projet');
+            }
+        }
+
+        async function loadProjectTasks() {
+            try {
+                const response = await API.getProjectTasks(projectId);
+                if (response.status === 200) {
+                    document.getElementById('tasksList').innerHTML = response.data.map(task => `
+                        <div class="task-item">
+                            <input type="checkbox" class="task-checkbox" 
+                                   ${task.completed ? 'checked' : ''} 
+                                   onchange="toggleTaskStatus(${task.id}, this.checked)">
+                            <div class="task-content">
+                                <div class="task-title">${task.title}</div>
+                                <div class="task-meta">
+                                    Échéance: ${new Date(task.due_date).toLocaleDateString()}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('') || '<p>Aucune tâche pour le moment</p>';
+                }
+            } catch (error) {
+                console.error('Erreur de chargement des tâches:', error);
+                alert('Erreur lors du chargement des tâches');
+            }
+        }
+
+        async function loadProjectMessages() {
+            try {
+                const response = await API.getProjectMessages(projectId);
+                if (response.status === 200) {
+                    document.getElementById('messagesList').innerHTML = response.data.map(message => `
+                        <div class="message-item">
+                            <div class="message-header">
+                                <span class="message-author">${message.user_name}</span>
+                                <span class="message-date">${new Date(message.created_at).toLocaleString()}</span>
+                            </div>
+                            <div class="message-content">${message.content}</div>
+                        </div>
+                    `).join('') || '<p>Aucun message pour le moment</p>';
+                }
+            } catch (error) {
+                console.error('Erreur de chargement des messages:', error);
+                alert('Erreur lors du chargement des messages');
+            }
+        }
+
+        async function loadProjectDocuments() {
+            try {
+                const response = await API.getProjectDocuments(projectId);
+                if (response.status === 200) {
+                    document.getElementById('documentsList').innerHTML = response.data.map(doc => `
+                        <div class="document-item">
+                            <div class="document-icon">📄</div>
+                            <div class="document-info">
+                                <div class="document-title">${doc.title}</div>
+                                <div class="document-meta">
+                                    Ajouté le ${new Date(doc.created_at).toLocaleDateString()}
+                                    par ${doc.user_name}
+                                </div>
+                            </div>
+                            <div class="document-actions">
+                                <a href="${doc.file_url}" class="btn" target="_blank">Télécharger</a>
+                                <button class="btn danger" onclick="deleteDocument(${doc.id})">Supprimer</button>
+                            </div>
+                        </div>
+                    `).join('') || '<p>Aucun document pour le moment</p>';
+                }
+            } catch (error) {
+                console.error('Erreur de chargement des documents:', error);
+                alert('Erreur lors du chargement des documents');
+            }
+        }
+
+        // Fonctions de gestion des modales
+        function openEditProjectModal() {
+            document.getElementById('editProjectModal').style.display = 'flex';
+        }
+
+        function closeEditProjectModal() {
+            document.getElementById('editProjectModal').style.display = 'none';
+        }
+
+        function openCreateTaskModal() {
+            document.getElementById('createTaskModal').style.display = 'flex';
+        }
+
+        function closeCreateTaskModal() {
+            document.getElementById('createTaskModal').style.display = 'none';
+        }
+
+        function openCreateMessageModal() {
+            document.getElementById('createMessageModal').style.display = 'flex';
+        }
+
+        function closeCreateMessageModal() {
+            document.getElementById('createMessageModal').style.display = 'none';
+        }
+
+        function openUploadDocumentModal() {
+            document.getElementById('uploadDocumentModal').style.display = 'flex';
+        }
+
+        function closeUploadDocumentModal() {
+            document.getElementById('uploadDocumentModal').style.display = 'none';
+        }
+
+        // Gestionnaires de formulaires
+        document.getElementById('editProjectForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = {
+                title: this.querySelector('[name="title"]').value,
+                description: this.querySelector('[name="description"]').value,
+                status: this.querySelector('[name="status"]').value
+            };
+
+            try {
+                const response = await API.updateProject(projectId, formData);
+                if (response.status === 200) {
+                    closeEditProjectModal();
+                    loadProjectDetails();
+                } else {
+                    alert(response.message);
+                }
+            } catch (error) {
+                console.error('Erreur de modification du projet:', error);
+                alert('Erreur lors de la modification du projet');
+            }
+        });
+
+        document.getElementById('createTaskForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = {
+                title: this.querySelector('[name="title"]').value,
+                description: this.querySelector('[name="description"]').value,
+                due_date: this.querySelector('[name="due_date"]').value,
+                project_id: projectId
+            };
+
+            try {
+                const response = await API.createTask(formData);
+                if (response.status === 201) {
+                    closeCreateTaskModal();
+                    this.reset();
+                    loadProjectTasks();
+                } else {
+                    alert(response.message);
+                }
+            } catch (error) {
+                console.error('Erreur de création de tâche:', error);
+                alert('Erreur lors de la création de la tâche');
+            }
+        });
+
+        document.getElementById('createMessageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = {
+                content: this.querySelector('[name="content"]').value,
+                project_id: projectId
+            };
+
+            try {
+                const response = await API.createMessage(formData);
+                if (response.status === 201) {
+                    closeCreateMessageModal();
+                    this.reset();
+                    loadProjectMessages();
+                } else {
+                    alert(response.message);
+                }
+            } catch (error) {
+                console.error('Erreur d\'envoi du message:', error);
+                alert('Erreur lors de l\'envoi du message');
+            }
+        });
+
+        document.getElementById('uploadDocumentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            formData.append('project_id', projectId);
+
+            try {
+                const response = await API.uploadDocument(formData);
+                if (response.status === 201) {
+                    closeUploadDocumentModal();
+                    this.reset();
+                    loadProjectDocuments();
+                } else {
+                    alert(response.message);
+                }
+            } catch (error) {
+                console.error('Erreur d\'upload du document:', error);
+                alert('Erreur lors de l\'upload du document');
+            }
+        });
+
+        // Fonctions utilitaires
+        function getStatusLabel(status) {
+            const labels = {
+                'en_cours': 'En cours',
+                'termine': 'Terminé',
+                'en_pause': 'En pause'
+            };
+            return labels[status] || status;
+        }
+
+        async function toggleTaskStatus(taskId, completed) {
+            try {
+                const response = await API.updateTask(taskId, { completed });
+                if (response.status !== 200) {
+                    alert(response.message);
+                    loadProjectTasks(); // Recharger pour rétablir l'état précédent
+                }
+            } catch (error) {
+                console.error('Erreur de mise à jour du statut de la tâche:', error);
+                alert('Erreur lors de la mise à jour du statut de la tâche');
+                loadProjectTasks();
+            }
+        }
+
+        async function deleteDocument(documentId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) {
+                try {
+                    const response = await API.deleteDocument(documentId);
+                    if (response.status === 200) {
+                        loadProjectDocuments();
+                    } else {
+                        alert(response.message);
+                    }
+                } catch (error) {
+                    console.error('Erreur de suppression du document:', error);
+                    alert('Erreur lors de la suppression du document');
+                }
+            }
+        }
+
+        async function deleteProject() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.')) {
+                try {
+                    const response = await API.deleteProject(projectId);
+                    if (response.status === 200) {
+                        window.location.href = '/projects-view.html';
+                    } else {
+                        alert(response.message);
+                    }
+                } catch (error) {
+                    console.error('Erreur de suppression du projet:', error);
+                    alert('Erreur lors de la suppression du projet');
+                }
+            }
+        }
+
+        // Fermer les modales si on clique en dehors
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let modal of modals) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

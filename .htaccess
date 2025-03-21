@@ -1,0 +1,13 @@
+RewriteEngine On
+
+# Rediriger les requêtes API vers les fichiers PHP appropriés
+RewriteRule ^api/auth/([^/]+)$ api/auth.php?endpoint=$1 [QSA,L]
+RewriteRule ^api/projects/?$ api/projects.php [QSA,L]
+RewriteRule ^api/projects/([0-9]+)$ api/projects.php?id=$1 [QSA,L]
+RewriteRule ^api/tasks/?$ api/tasks.php [QSA,L]
+RewriteRule ^api/tasks/([0-9]+)$ api/tasks.php?id=$1 [QSA,L]
+
+# Rediriger toutes les autres requêtes vers index.html si le fichier/dossier n'existe pas
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.html [L] 

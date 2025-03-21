@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProjectSpace - Mes Projets</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2e2e2e;
+            --secondary-color: #f7f6f3;
+            --accent-color: #4299e1;
+            --border-color: #e0e0e0;
+            --sidebar-color: #f7f6f3;
+            --text-color: #37352f;
+            --light-text: #888888;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: white;
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 240px;
+            background-color: var(--sidebar-color);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 10px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 0 10px 20px 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .workspace-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+
+        .sidebar-section-title {
+            text-transform: uppercase;
+            font-size: 11px;
+            color: var(--light-text);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            margin-bottom: 2px;
+            border-radius: 3px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .sidebar-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-item.active {
+            background-color: rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+        }
+
+        .sidebar-item-icon {
+            width: 18px;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: white;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: var(--light-text);
+        }
+
+        .breadcrumb span {
+            margin: 0 5px;
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #38a169;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .content-area {
+            padding: 20px 40px 60px;
+            width: 100%;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+            outline: none;
+        }
+
+        .nav-bar {
+            background-color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .projects-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: var(--primary-color);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #2b6cb0;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .project-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .project-card p {
+            color: var(--light-text);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .project-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .project-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-en-cours {
+            background-color: #ebf8ff;
+            color: var(--accent-color);
+        }
+
+        .status-termine {
+            background-color: #f0fff4;
+            color: #48bb78;
+        }
+
+        .status-en-attente {
+            background-color: #fffaf0;
+            color: #ed8936;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .message {
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .error {
+            background-color: #fff5f5;
+            color: #e53e3e;
+            border: 1px solid #feb2b2;
+        }
+
+        .success {
+            background-color: #f0fff4;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="workspace-icon">📊</div>
+            <div class="workspace-name">Team Workspace</div>
+        </div>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Workspace</div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📋</div>
+                <a href="./notion-style-pm-platform.html">Dashboard</a>
+                
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📅</div>
+                <a href="./notion-pm-calendar-page.html">Calendar</a>
+                
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📊</div>
+                <a href="./project-details-view.html">Tasks</a>
+                
+            </div>
+            <div class="sidebar-item active">
+                <div class="sidebar-item-icon">💬</div>
+                <a href="./messages-view.html">Messages</a>
+                
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📁</div>
+                <div>Files</div>
+            </div>
+        </div>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Projects</div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">🚀</div>
+                <div>Website Redesign</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📱</div>
+                <div>Mobile App</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">🔍</div>
+                <div>Market Research</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">⚙️</div>
+                <div>Product Development</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="breadcrumb">
+                <a href="dashboard.html" style="color: inherit; text-decoration: none;">ProjectSpace</a>
+                <span>/</span>
+                <span>Projets</span>
+            </div>
+            <div class="top-bar-actions">
+                <button class="btn btn-primary" onclick="showNewProjectModal()">
+                    <i class="fas fa-plus"></i>
+                    Nouveau Projet
+                </button>
+                <div class="user-avatar">JS</div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <h1 class="page-title">Mes Projets</h1>
+
+        <!-- Messages de notification -->
+        <div id="error-message" class="message error" style="display: none;"></div>
+        <div id="success-message" class="message success" style="display: none;"></div>
+
+        <!-- Liste des projets -->
+        <div id="projects-list" class="projects-grid">
+            <!-- Les projets seront chargés dynamiquement ici -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour nouveau projet -->
+    <div id="new-project-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Nouveau Projet</h2>
+            <form id="new-project-form">
+                <div class="form-group">
+                    <label for="project-title">Titre</label>
+                    <input type="text" id="project-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="project-description">Description</label>
+                    <textarea id="project-description" name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="project-status">Statut</label>
+                    <select id="project-status" name="status" required>
+                        <option value="en_cours">En cours</option>
+                        <option value="en_pause">En pause</option>
+                        <option value="termine">Terminé</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i>
+                        Créer
+                    </button>
+                    <button type="button" class="btn" onclick="hideNewProjectModal()">
+                        <i class="fas fa-times"></i>
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/projects.js"></script>
+    <script>
+        // Vérifier l'authentification au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = localStorage.getItem('user');
+            if (!user) {
+                window.location.href = 'login-signup-page.html';
+            }
+        });
+
+        // Gestion de la déconnexion
+        document.getElementById('logout-link').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth.php?endpoint=logout`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    localStorage.removeItem('user');
+                    window.location.href = 'login-signup-page.html';
+                }
+            } catch (error) {
+                console.error('Erreur lors de la déconnexion:', error);
+            }
+        });
+
+        // Fonctions pour le modal
+        function showNewProjectModal() {
+            document.getElementById('new-project-modal').style.display = 'block';
+        }
+
+        function hideNewProjectModal() {
+            document.getElementById('new-project-modal').style.display = 'none';
+        }
+
+        // Gestion du formulaire de nouveau projet
+        document.getElementById('new-project-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/projects.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: formData.get('title'),
+                        description: formData.get('description'),
+                        status: formData.get('status')
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('Projet créé avec succès!');
+                    hideNewProjectModal();
+                    loadProjects(); // Recharger la liste des projets
+                } else {
+                    showError(data.message || 'Erreur lors de la création du projet');
+                }
+            } catch (error) {
+                showError('Erreur de connexion au serveur');
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

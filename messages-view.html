@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProjectSpace - Messages</title>
+    <style>
+        :root {
+            --primary-color: #2e2e2e;
+            --secondary-color: #f7f6f3;
+            --accent-color: #e16259;
+            --border-color: #e0e0e0;
+            --sidebar-color: #f7f6f3;
+            --text-color: #37352f;
+            --light-text: #888888;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        body {
+            background-color: white;
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 240px;
+            background-color: var(--sidebar-color);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 10px;
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 0 10px 20px 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .workspace-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+        
+        .sidebar-section-title {
+            text-transform: uppercase;
+            font-size: 11px;
+            color: var(--light-text);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            margin-bottom: 2px;
+            border-radius: 3px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .sidebar-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-item.active {
+            background-color: rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+        }
+        
+        .sidebar-item-icon {
+            width: 18px;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .messages-list {
+            width: 320px;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+        
+        .messages-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .messages-list-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .message-search {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .message-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+        
+        .message-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .message-item.active {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 16px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .message-details {
+            flex: 1;
+        }
+        
+        .message-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .message-preview {
+            font-size: 13px;
+            color: var(--light-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: var(--light-text);
+        }
+        
+        .message-unread {
+            background-color: #4299e1;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .message-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message-view-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .message-view-details {
+            flex: 1;
+            margin-left: 15px;
+        }
+        
+        .message-view-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .message-view-status {
+            font-size: 12px;
+            color: var(--light-text);
+        }
+        
+        .message-conversation {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            margin-bottom: 15px;
+            clear: both;
+        }
+        
+        .message-bubble.sent {
+            float: right;
+            text-align: right;
+        }
+        
+        .message-bubble.received {
+            float: left;
+        }
+        
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 15px;
+            display: inline-block;
+            max-width: 100%;
+        }
+        
+        .message-bubble.sent .message-content {
+            background-color: #4299e1;
+            color: white;
+        }
+        
+        .message-bubble.received .message-content {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        
+        .message-input-area {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        
+        .send-button {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .send-button:hover {
+            background-color: #2b6cb0;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="workspace-icon">📊</div>
+            <div class="workspace-name">Team Workspace</div>
+        </div>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Workspace</div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📋</div>
+                <a href="./notion-style-pm-platform.html">Dashboard</a>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📅</div>
+                <a href="./notion-pm-calendar-page.html">Calendar</a>
+                
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📊</div>
+                <a href="./project-details-view.html">Tasks</a>
+                
+            </div>
+            <div class="sidebar-item active">
+                <div class="sidebar-item-icon">💬</div>
+                <a href="./messages-view.html">Messages</a>
+                
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📁</div>
+                <a href="#">Files</a>
+                
+            </div>
+        </div>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Projects</div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">🚀</div>
+                <div>Website Redesign</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📱</div>
+                <div>Mobile App</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">🔍</div>
+                <div>Market Research</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">⚙️</div>
+                <div>Product Development</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="messages-list">
+            <div class="messages-list-header">
+                <div class="messages-list-title">Messages</div>
+                <button class="action-button">+ New</button>
+            </div>
+            
+            <input type="text" class="message-search" placeholder="Search messages...">
+            
+            <div class="message-item active">
+                <div class="message-avatar" style="background-color: #4299e1;">SK</div>
+                <div class="message-details">
+                    <div class="message-name">Sarah Kim</div>
+                    <div class="message-preview">Can we review the design wireframes this afternoon?</div>
+                </div>
+                <div class="message-time">2:45 PM</div>
+                <div class="message-unread">1</div>
+            </div>
+            
+            <div class="message-item">
+                <div class="message-avatar" style="background-color: #38a169;">MT</div>
+                <div class="message-details">
+                    <div class="message-name">Michael Tang</div>
+                    <div class="message-preview">Code review is ready. Please check the pull request.</div>
+                </div>
+                <div class="message-time">12:30 PM</div>
+            </div>
+            
+            <div class="message-item">
+                <div class="message-avatar" style="background-color: #805ad5;">JL</div>
+                <div class="message-details">
+                    <div class="message-name">James Lee</div>
+                    <div class="message-preview">Marketing campaign draft is complete.</div>
+                </div>
+                <div class="message-time">10:15 AM</div>
+            </div>
+        </div>
+        
+        <div class="message-view">
+            <div class="message-view-header">
+                <div class="message-avatar" style="background-color: #4299e1;">SK</div>
+                <div class="message-view-details">
+                    <div class="message-view-name">Sarah Kim</div>
+                    <div class="message-view-status">Online</div>
+                </div>
+                <button class="action-button">Call</button>
+                <button class="action-button">Video</button>
+            </div>
+            
+            <div class="message-conversation">
+                <div class="message-bubble received">
+                    <div class="message-content">Hi John, can we review the design wireframes this afternoon?</div>
+                </div>
+                <div class="message-bubble sent">
+                    <div class="message-content">Sure, I have some time at 3 PM. Does that work for you?</div>
+                </div>
+                <div class="message-bubble received">
+                    <div class="message-content">Perfect! I'll prepare the latest mockups for our discussion.</div>
+                </div>
+            </div>
+            
+            <div class="message-input-area">
+                <input type="text" class="message-input" placeholder="Type a message...">
+                <button class="send-button">Send</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

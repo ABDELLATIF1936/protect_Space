@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ProjectSpace - Collaborative Project Management</title>
+    <style>
+        :root {
+            --primary-color: #2e2e2e;
+            --secondary-color: #f7f6f3;
+            --accent-color: #4299e1;
+            --accent-hover: #2b6cb0;
+            --text-color: #37352f;
+            --light-text: #888888;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: white;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            background-color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            font-size: 32px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .cta-buttons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            background-color: transparent;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            align-items: center;
+            padding: 100px 0;
+            gap: 50px;
+        }
+
+        .hero-content {
+            flex: 1;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            color: var(--light-text);
+            margin-bottom: 30px;
+        }
+
+        .hero-illustration {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-illustration svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Features Section */
+        .features {
+            background-color: var(--secondary-color);
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .feature-card {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        .feature-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .feature-description {
+            color: var(--light-text);
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .testimonial-card {
+            background-color: var(--secondary-color);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .testimonial-quote {
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            background-color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* CTA Section */
+        .cta {
+            background-color: var(--accent-color);
+            color: white;
+            text-align: center;
+            padding: 100px 0;
+        }
+
+        .cta-title {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .cta-subtitle {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 50px 0;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .footer-section {
+            flex: 1;
+        }
+
+        .footer-title {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .footer-links a {
+            display: block;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            margin-bottom: 10px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar container">
+        <div class="logo">
+            <span class="logo-icon">📊</span>
+            ProjectSpace
+        </div>
+        <div class="nav-links">
+            <a href="#">Features</a>
+            <a href="#">Pricing</a>
+            <a href="#">Customers</a>
+            <a href="#">Resources</a>
+        </div>
+        <div class="cta-buttons">
+            <a href="./login-signup-page.html" class="btn btn-secondary">Log In</a>
+            <a href="./login-signup-page.html" class="btn btn-primary">Start Free Trial</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero container">
+        <div class="hero-content">
+            <h1 class="hero-title">Collaborate, Manage, and Grow Your Projects</h1>
+            <p class="hero-subtitle">ProjectSpace helps teams organize, track, and manage their work with ease. From small startups to large enterprises, we've got you covered.</p>
+            <div class="cta-buttons">
+                <a href="./login-signup-page.html" class="btn btn-primary">Get Started</a>
+                <a href="#" class="btn btn-secondary">Watch Demo</a>
+            </div>
+        </div>
+        <div class="hero-illustration">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+                <rect width="100%" height="100%" fill="#f7f6f3"/>
+                <circle cx="300" cy="200" r="150" fill="#4299e1" opacity="0.1"/>
+                <g transform="translate(150, 100)">
+                    <rect width="300" height="200" rx="10" fill="white" stroke="#e0e0e0" stroke-width="2"/>
+                    <rect x="20" y="20" width="260" height="40" rx="5" fill="#4299e1" opacity="0.2"/>
+                    <rect x="20" y="70" width="260" height="20" rx="5" fill="#e9ecef"/>
+                    <rect x="20" y="100" width="180" height="20" rx="5" fill="#e9ecef"/>
+                    <circle cx="50" cy="160" r="30" fill="#38a169" opacity="0.2"/>
+                    <circle cx="120" cy="160" r="30" fill="#e53e3e" opacity="0.2"/>
+                    <circle cx="190" cy="160" r="30" fill="#805ad5" opacity="0.2"/>
+                </g>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Powerful Features for Modern Teams</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
+                    <h3 class="feature-title">Smart Scheduling</h3>
+                    <p class="feature-description">Effortlessly plan and track project timelines with our intuitive calendar view.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3 class="feature-title">Team Collaboration</h3>
+                    <p class="feature-description">Seamlessly communicate and collaborate with your team in real-time.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Advanced Reporting</h3>
+                    <p class="feature-description">Gain insights with comprehensive project analytics and performance tracking.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials container">
+        <h2 class="section-title">What Our Customers Say</h2>
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <p class="testimonial-quote">"ProjectSpace transformed how our team works. It's intuitive, powerful, and has dramatically improved our productivity."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">SJ</div>
+                    <div>
+                        <strong>Sarah Johnson</strong>
+                        <div>CEO, Tech Innovations</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <p class="testimonial-quote">"The simplicity of ProjectSpace is its greatest strength. We went from chaos to clarity in weeks."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">MR</div>
+                    <div>
+                        <strong>Michael Rodriguez</strong>
+                        <div>Product Manager</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <p class="testimonial-quote">"I've tried many project management tools. ProjectSpace is by far the most user-friendly and comprehensive."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">LK</div>
+                    <div>
+                        <strong>Lisa Kim</strong>
+                        <div>Marketing Director</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2 class="cta-title">Ready to Supercharge Your Team's Productivity?</h2>
+            <p class="cta-subtitle">Start your free 14-day trial. No credit card required.</p>
+            <a href="#" class="btn btn-secondary">Start Free Trial</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h4 class="footer-title">ProjectSpace</h4>
+                <p>Empowering teams to work smarter, not harder.</p>
+            </div>
+            <div class="footer-section">
+                <h4 class="footer-title">Product</h4>
+                <div class="footer-links">
+                    <a href="#">Features</a>
+                    <a href="#">Pricing</a>
+                    <a href="#">Integrations</a>
+                    <a href="#">Security</a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4 class="footer-title">Company</h4>
+                <div class="footer-links">
+                    <a href="#">About Us</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Press</a>
+                    <a href="#">Contact</a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4 class="footer-title">Resources</h4>
+                <div class="footer-links">
+                    <a href="#">Blog</a>
+                    <a href="#">Help Center</a>
+                    <a href="#">Guides</a>
+                    <a href="#">Community</a>
+                </div>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            © 2025 ProjectSpace. All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>

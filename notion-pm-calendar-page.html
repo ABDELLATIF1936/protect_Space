@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProjectSpace - Calendrier</title>
+    <style>
+        :root {
+            --primary-color: #2e2e2e;
+            --secondary-color: #f7f6f3;
+            --accent-color: #4299e1;
+            --border-color: #e0e0e0;
+            --sidebar-color: #f7f6f3;
+            --text-color: #37352f;
+            --light-text: #888888;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        body {
+            background-color: white;
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 240px;
+            background-color: var(--sidebar-color);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 10px;
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 0 10px 20px 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .workspace-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+        
+        .sidebar-section-title {
+            text-transform: uppercase;
+            font-size: 11px;
+            color: var(--light-text);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            margin-bottom: 2px;
+            border-radius: 3px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        
+        .sidebar-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-item.active {
+            background-color: rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+        }
+        
+        .sidebar-item-icon {
+            width: 18px;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: var(--light-text);
+        }
+        
+        .breadcrumb span {
+            margin: 0 5px;
+        }
+        
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #38a169;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .content-area {
+            padding: 20px 40px 60px;
+            width: 100%;
+        }
+        
+        .page-title {
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+            outline: none;
+        }
+        
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .month-selector {
+            display: flex;
+            align-items: center;
+        }
+        
+        .month-name {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 0 15px;
+        }
+        
+        .view-options {
+            display: flex;
+        }
+        
+        .view-option {
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-left: 5px;
+            font-size: 14px;
+        }
+        
+        .view-option.active {
+            background-color: rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+        }
+        
+        .monthly-calendar {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .monthly-calendar th {
+            padding: 10px;
+            text-align: center;
+            font-weight: 500;
+            color: var(--light-text);
+            font-size: 14px;
+        }
+        
+        .monthly-calendar td {
+            border: 1px solid var(--border-color);
+            height: 120px;
+            vertical-align: top;
+            padding: 8px;
+        }
+        
+        .date-number {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .date-today {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-color: #4299e1;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+        }
+        
+        .date-event {
+            padding: 4px 6px;
+            border-radius: 3px;
+            margin-bottom: 5px;
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        
+        .date-event.design {
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+        }
+        
+        .date-event.development {
+            background-color: #faf5ff;
+            color: #805ad5;
+        }
+        
+        .date-event.marketing {
+            background-color: #f0fff4;
+            color: #2f855a;
+        }
+        
+        .date-event.meeting {
+            background-color: #fff5f5;
+            color: #c53030;
+        }
+        
+        .date-event.deadline {
+            background-color: #fffaf0;
+            color: #dd6b20;
+        }
+        
+        .not-current-month {
+            background-color: #f9f9f9;
+            color: #bbb;
+        }
+        
+        .not-current-month .date-event {
+            opacity: 0.6;
+        }
+        
+        .action-button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 3px;
+            color: var(--light-text);
+            font-size: 14px;
+        }
+        
+        .action-button:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .action-button.primary {
+            background-color: #4299e1;
+            color: white;
+        }
+        
+        .action-button.primary:hover {
+            background-color: #2b6cb0;
+        }
+        
+        .add-event-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #4299e1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            border: none;
+        }
+        
+        .add-event-button:hover {
+            background-color: #2b6cb0;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="workspace-icon">📊</div>
+            <div class="workspace-name">Team Workspace</div>
+        </div>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Workspace</div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📋</div>
+                <a href="./notion-style-pm-platform.html">Dashboard</a>
+                
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📅</div>
+                <a href="./notion-pm-calendar-page.html">Calendar</a>
+                
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📊</div>
+                <a href="./project-details-view.html">Tasks</a>
+                
+            </div>
+            <div class="sidebar-item active">
+                <div class="sidebar-item-icon">💬</div>
+                <a href="./messages-view.html">Messages</a>
+                
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📁</div>
+                <div>Files</div>
+            </div>
+        </div>
+        
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Projects</div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">🚀</div>
+                <div>Website Redesign</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">📱</div>
+                <div>Mobile App</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">🔍</div>
+                <div>Market Research</div>
+            </div>
+            <div class="sidebar-item">
+                <div class="sidebar-item-icon">⚙️</div>
+                <div>Product Development</div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="breadcrumb">
+                <div>Team Workspace</div>
+                <span>/</span>
+                <div>Calendar</div>
+            </div>
+            <div class="top-bar-actions">
+                <button class="action-button">Filter</button>
+                <button class="action-button primary">Share</button>
+                <div class="user-avatar">JD</div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <div class="page-title" contenteditable="true">Calendar</div>
+            
+            <div class="calendar-header">
+                <div class="month-selector">
+                    <button class="action-button">←</button>
+                    <div class="month-name">March 2025</div>
+                    <button class="action-button">→</button>
+                </div>
+                <div class="view-options">
+                    <div class="view-option">Day</div>
+                    <div class="view-option">Week</div>
+                    <div class="view-option active">Month</div>
+                </div>
+            </div>
+            
+            <table class="monthly-calendar">
+                <thead>
+                    <tr>
+                        <th>Sunday</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="not-current-month">
+                            <div class="date-number">23</div>
+                        </td>
+                        <td class="not-current-month">
+                            <div class="date-number">24</div>
+                        </td>
+                        <td class="not-current-month">
+                            <div class="date-number">25</div>
+                        </td>
+                        <td class="not-current-month">
+                            <div class="date-number">26</div>
+                        </td>
+                        <td class="not-current-month">
+                            <div class="date-number">27</div>
+                        </td>
+                        <td class="not-current-month">
+                            <div class="date-number">28</div>
+                        </td>
+                        <td>
+                            <div class="date-number">1</div>
+                            <div class="date-event design">Design Review</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="date-number">2</div>
+                        </td>
+                        <td>
+                            <div class="date-number date-today">3</div>
+                        </td>
+                        <td>
+                            <div class="date-number">4</div>
+                            <div class="date-event meeting">Team Meeting</div>
+                            <div class="date-event marketing">Content Planning</div>
+                        </td>
+                        <td>
+                            <div class="date-number">5</div>
+                        </td>
+                        <td>
+                            <div class="date-number">6</div>
+                            <div class="date-event meeting">Client Call</div>
+                        </td>
+                        <td>
+                            <div class="date-number">7</div>
+                        </td>
+                        <td>
+                            <div class="date-number">8</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="date-number">9</div>
+                        </td>
+                        <td>
+                            <div class="date-number">10</div>
+                            <div class="date-event development">Sprint Review</div>
+                        </td>
+                        <td>
+                            <div class="date-number">11</div>
+                            <div class="date-event development">Sprint Planning</div>
+                        </td>
+                        <td>
+                            <div class="date-number">12</div>
+                        </td>
+                        <td>
+                            <div class="date-number">13</div>
+                            <div class="date-event meeting">Planning Session</div>
+                        </td>
+                        <td>
+                            <div class="date-number">14</div>
+                        </td>
+                        <td>
+                            <div class="date-number">15</div>
+                            <div class="date-event deadline">Website Redesign Deadline</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="date-number">16</div>
+                        </td>
+                        <td>
+                            <div class="date-number">17</div>
+                        </td>
+                        <td>
+                            <div class="date-number">18</div>
+                            <div class="date-event meeting">Retrospective</div>
+                        </td>
+                        <td>
+                            <div class="date-number">19</div>
+                        </td>
+                        <td>
+                            <div class="date-number">20</div>
+                            <div class="date-event design">Design Workshop</div>
+                        </td>
+                        <td>
+                            <div class="date-number">21</div>
+                        </td>
+                        <td>
+                            <div class="date-number">22</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="date-number">23</div>
+                        </td>
+                        <td>
+                            <div class="date-number">24</div>
+                            <div class="date-event development">Code Review</div>
+                        </td>
+                        <td>
+                            <div class="date-number">25</div>
+                            <div class="date-event meeting">Status Update</div>
+                        </td>
+                        <td>
+                            <div class="date-number">26</div>
+                        </td>
+                        <td>
+                            <div class="date-number">27</div>
+                        </td>
+                        <td>
+                            <div class="date-number">28</div>
+                            <div class="date-event marketing">Campaign Launch</div>
+                        </td>
+                        <td>
+                            <div class="date-number">29</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="date-number">30</div>
+                        </td>
+                        <td>
+                            <div class="date-number">31</div>
+                            <div class="date-event meeting">Monthly Review</div>
+                        </td>
+                        <td class="not-current-month">
+                            <div class="date-number">1</div>
+                        </td>
+                        <td class="not-current-month">
+                            <div class="date-number">2</div>
+                        </td>
+                        <td class="not-current-month">
+                            <div class="date-number">3</div>
+                        </td>
+                        <td class="not-current-month">
+                            <div class="date-number">4</div>
+                        </td>
+                        <td class="not-current-month">
+                            <div class="date-number">5</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <button class="add-event-button">+</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/calendar.js"></script>
+</body>
+</html>
