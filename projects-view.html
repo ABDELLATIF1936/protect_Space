@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProjectSpace - Mes Projets</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Mes Projets - ProjectSpace</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/projects.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
             --primary-color: #2e2e2e;
@@ -294,6 +296,7 @@
             color: #ed8936;
         }
 
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -301,32 +304,47 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
         }
 
         .modal-content {
-            background: white;
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 30px;
-            border-radius: 10px;
             position: relative;
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .modal h2 {
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
-            color: var(--primary-color);
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--light-text);
+        }
+
+        .close-button:hover {
+            color: var(--text-color);
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: var(--text-color);
+            margin-bottom: 5px;
             font-weight: 500;
         }
 
@@ -334,25 +352,113 @@
         .form-group textarea,
         .form-group select {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 4px;
+            font-size: 14px;
         }
 
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
         }
 
-        .modal-buttons {
+        .form-actions {
             display: flex;
-            gap: 10px;
             justify-content: flex-end;
+            gap: 10px;
             margin-top: 20px;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: var(--text-color);
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+        }
+
+        /* Project Card Styles */
+        .project-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .project-header h3 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .project-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .project-status.en_cours {
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+        }
+
+        .project-status.en_pause {
+            background-color: #fefcbf;
+            color: #975a16;
+        }
+
+        .project-status.termine {
+            background-color: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .project-description {
+            color: var(--light-text);
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .project-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--light-text);
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: var(--light-text);
+            transition: color 0.2s ease;
+        }
+
+        .btn-icon:hover {
+            color: var(--accent-color);
         }
 
         .message {
@@ -407,7 +513,8 @@
             </div>
             <div class="sidebar-item">
                 <div class="sidebar-item-icon">📁</div>
-                <div>Files</div>
+                <a href="./projects-view.html">Projects</a>
+                
             </div>
         </div>
         
@@ -432,6 +539,7 @@
         </div>
     </div>
 
+
     <!-- Main Content -->
     <div class="main-content">
         <div class="top-bar">
@@ -441,7 +549,7 @@
                 <span>Projets</span>
             </div>
             <div class="top-bar-actions">
-                <button class="btn btn-primary" onclick="showNewProjectModal()">
+                <button class="btn btn-primary new-project-btn">
                     <i class="fas fa-plus"></i>
                     Nouveau Projet
                 </button>
@@ -450,57 +558,59 @@
         </div>
 
         <div class="content-area">
-            <h1 class="page-title">Mes Projets</h1>
+            <!-- Messages de notification -->
+            <div id="error-message" class="message error"></div>
+            <div id="success-message" class="message success"></div>
 
-        <!-- Messages de notification -->
-        <div id="error-message" class="message error" style="display: none;"></div>
-        <div id="success-message" class="message success" style="display: none;"></div>
-
-        <!-- Liste des projets -->
-        <div id="projects-list" class="projects-grid">
-            <!-- Les projets seront chargés dynamiquement ici -->
+            <div class="projects-container">
+                <div class="header">
+                    <h1>Mes Projets</h1>
+                    <button class="btn btn-primary new-project-btn">
+                        <i class="fas fa-plus"></i> Nouveau Projet
+                    </button>
+                </div>
+                <div id="projects-list" class="projects-grid">
+                    <!-- Les projets seront ajoutés ici dynamiquement -->
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Modal pour nouveau projet -->
-    <div id="new-project-modal" class="modal" style="display: none;">
+    <div id="new-project-modal" class="modal">
         <div class="modal-content">
-            <h2>Nouveau Projet</h2>
+            <div class="modal-header">
+                <h2>Nouveau Projet</h2>
+                <button class="close-button">×</button>
+            </div>
             <form id="new-project-form">
                 <div class="form-group">
-                    <label for="project-title">Titre</label>
-                    <input type="text" id="project-title" name="title" required>
+                    <label for="title">Titre*</label>
+                    <input type="text" id="title" name="title" required>
                 </div>
                 <div class="form-group">
-                    <label for="project-description">Description</label>
-                    <textarea id="project-description" name="description" required></textarea>
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="4"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="project-status">Statut</label>
-                    <select id="project-status" name="status" required>
-                        <option value="en_cours">En cours</option>
-                        <option value="en_pause">En pause</option>
-                        <option value="termine">Terminé</option>
+                    <label for="status">Statut</label>
+                    <select id="status" name="status">
+                        <option value="en cours">En cours</option>
+                        <option value="en pause">En pause</option>
+                        <option value="terminé">Terminé</option>
                     </select>
                 </div>
-                <div class="modal-buttons">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i>
-                        Créer
-                    </button>
-                    <button type="button" class="btn" onclick="hideNewProjectModal()">
-                        <i class="fas fa-times"></i>
-                        Annuler
-                    </button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-close">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Créer</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="assets/js/app.js"></script>
-    <script src="assets/js/projects.js"></script>
+    <script src="./assets/js/api.js"></script>
+    <script src="./assets/js/projects.js"></script>
     <script>
         // Vérifier l'authentification au chargement de la page
         document.addEventListener('DOMContentLoaded', () => {
@@ -511,11 +621,12 @@
         });
 
         // Gestion de la déconnexion
-        document.getElementById('logout-link').addEventListener('click', async (e) => {
+        document.getElementById('logout-link')?.addEventListener('click', async (e) => {
             e.preventDefault();
             try {
-                const response = await fetch(`${API_BASE_URL}/auth.php?endpoint=logout`, {
-                    method: 'POST'
+                const response = await fetch(`${API_BASE_URL}/auth.php?action=logout`, {
+                    method: 'POST',
+                    credentials: 'include'
                 });
                 
                 if (response.ok) {
@@ -524,48 +635,6 @@
                 }
             } catch (error) {
                 console.error('Erreur lors de la déconnexion:', error);
-            }
-        });
-
-        // Fonctions pour le modal
-        function showNewProjectModal() {
-            document.getElementById('new-project-modal').style.display = 'block';
-        }
-
-        function hideNewProjectModal() {
-            document.getElementById('new-project-modal').style.display = 'none';
-        }
-
-        // Gestion du formulaire de nouveau projet
-        document.getElementById('new-project-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/projects.php`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        title: formData.get('title'),
-                        description: formData.get('description'),
-                        status: formData.get('status')
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showSuccess('Projet créé avec succès!');
-                    hideNewProjectModal();
-                    loadProjects(); // Recharger la liste des projets
-                } else {
-                    showError(data.message || 'Erreur lors de la création du projet');
-                }
-            } catch (error) {
-                showError('Erreur de connexion au serveur');
-                console.error(error);
             }
         });
     </script>

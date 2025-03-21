@@ -1,249 +1,200 @@
 <?php
-session_start();
-require_once '../config/database.php';
-
 header('Content-Type: application/json');
+session_start();
 
-// Vérifier l'authentification
+require_once 'db_connect.php';
+
+// Vérification de l'authentification
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode([
-        'status' => 401,
-        'message' => 'Non authentifié'
-    ]);
+    echo json_encode(['error' => 'Non authentifié']);
     exit;
 }
 
-$method = $_SERVER['REQUEST_METHOD'];
-$userId = $_SESSION['user_id'];
+try {
+    $pdo = getConnection();
+    $method = $_SERVER['REQUEST_METHOD'];
 
-switch ($method) {
-    case 'GET':
-        $projectId = $_GET['project_id'] ?? null;
-        
-        if (!$projectId) {
-            http_response_code(400);
-            echo json_encode([
-                'status' => 400,
-                'message' => 'ID du projet manquant'
-            ]);
-            exit;
-        }
+    switch ($method) {
+        case 'GET':
+            if (!isset($_GET['project_id'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'ID du projet manquant']);
+                exit;
+            }
 
-        try {
-            // Vérifier que l'utilisateur a accès au projet
+            // Vérifier l'accès au projet
             $stmt = $pdo->prepare("
                 SELECT 1 FROM project_members 
                 WHERE project_id = ? AND user_id = ?
             ");
-            $stmt->execute([$projectId, $userId]);
-            
+            $stmt->execute([$_GET['project_id'], $_SESSION['user_id']]);
             if (!$stmt->fetch()) {
                 http_response_code(403);
-                echo json_encode([
-                    'status' => 403,
-                    'message' => 'Accès non autorisé'
-                ]);
+                echo json_encode(['error' => 'Accès non autorisé']);
                 exit;
             }
 
             // Récupérer les tâches du projet
             $stmt = $pdo->prepare("
-                SELECT t.*, u.full_name as assigned_to_name
+                SELECT t.*, 
+                       u.full_name as assigned_to_name
                 FROM tasks t
                 LEFT JOIN users u ON t.assigned_to = u.id
                 WHERE t.project_id = ?
-                ORDER BY t.due_date ASC
+                ORDER BY t.created_at DESC
             ");
-            $stmt->execute([$projectId]);
-            $tasks = $stmt->fetchAll();
+            $stmt->execute([$_GET['project_id']]);
+            echo json_encode($stmt->fetchAll());
+            break;
 
-            echo json_encode([
-                'status' => 200,
-                'tasks' => $tasks
-            ]);
-        } catch (Exception $e) {
-            error_log('Erreur SQL: ' . $e->getMessage());
-            http_response_code(500);
-            echo json_encode([
-                'status' => 500,
-                'message' => 'Erreur lors de la récupération des tâches'
-            ]);
-        }
-        break;
+        case 'POST':
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            if (empty($data['project_id']) || empty($data['title'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Données manquantes']);
+                exit;
+            }
 
-    case 'POST':
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        if (empty($data['project_id']) || empty($data['title'])) {
-            http_response_code(400);
-            echo json_encode([
-                'status' => 400,
-                'message' => 'Projet ID et titre requis'
-            ]);
-            exit;
-        }
-
-        try {
-            // Vérifier que l'utilisateur a accès au projet
+            // Vérifier l'accès au projet
             $stmt = $pdo->prepare("
                 SELECT 1 FROM project_members 
                 WHERE project_id = ? AND user_id = ?
             ");
-            $stmt->execute([$data['project_id'], $userId]);
-            
+            $stmt->execute([$data['project_id'], $_SESSION['user_id']]);
             if (!$stmt->fetch()) {
                 http_response_code(403);
-                echo json_encode([
-                    'status' => 403,
-                    'message' => 'Accès non autorisé'
-                ]);
+                echo json_encode(['error' => 'Accès non autorisé']);
                 exit;
             }
 
             // Créer la tâche
             $stmt = $pdo->prepare("
-                INSERT INTO tasks (project_id, title, description, assigned_to, due_date)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO tasks (project_id, title, description, status, priority, due_date, assigned_to)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $data['project_id'],
                 $data['title'],
                 $data['description'] ?? null,
-                $data['assigned_to'] ?? null,
-                $data['due_date'] ?? null
+                $data['status'] ?? 'à faire',
+                $data['priority'] ?? 'moyenne',
+                $data['due_date'] ?? null,
+                $data['assigned_to'] ?? null
             ]);
 
             $taskId = $pdo->lastInsertId();
 
-            http_response_code(201);
-            echo json_encode([
-                'status' => 201,
-                'message' => 'Tâche créée avec succès',
-                'task_id' => $taskId
-            ]);
-        } catch (Exception $e) {
-            error_log('Erreur SQL: ' . $e->getMessage());
-            http_response_code(500);
-            echo json_encode([
-                'status' => 500,
-                'message' => 'Erreur lors de la création de la tâche'
-            ]);
-        }
-        break;
-
-    case 'PUT':
-        $taskId = $_GET['id'] ?? null;
-        if (!$taskId) {
-            http_response_code(400);
-            echo json_encode([
-                'status' => 400,
-                'message' => 'ID de la tâche manquant'
-            ]);
-            exit;
-        }
-
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        try {
-            // Vérifier que l'utilisateur a accès à la tâche
+            // Mettre à jour le score de l'utilisateur
             $stmt = $pdo->prepare("
-                SELECT t.* FROM tasks t
+                INSERT INTO activity_scores (user_id, project_id, action_type, points)
+                VALUES (?, ?, 'task_completed', 2)
+            ");
+            $stmt->execute([$_SESSION['user_id'], $data['project_id']]);
+
+            // Récupérer la tâche créée
+            $stmt = $pdo->prepare("
+                SELECT t.*, 
+                       u.full_name as assigned_to_name
+                FROM tasks t
+                LEFT JOIN users u ON t.assigned_to = u.id
+                WHERE t.id = ?
+            ");
+            $stmt->execute([$taskId]);
+            $task = $stmt->fetch();
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Tâche créée avec succès',
+                'task' => $task
+            ]);
+            break;
+
+        case 'PUT':
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            if (empty($data['id'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'ID de la tâche manquant']);
+                exit;
+            }
+
+            // Vérifier l'accès à la tâche
+            $stmt = $pdo->prepare("
+                SELECT t.project_id 
+                FROM tasks t
                 JOIN project_members pm ON t.project_id = pm.project_id
                 WHERE t.id = ? AND pm.user_id = ?
             ");
-            $stmt->execute([$taskId, $userId]);
-            
-            if (!$stmt->fetch()) {
+            $stmt->execute([$data['id'], $_SESSION['user_id']]);
+            $task = $stmt->fetch();
+
+            if (!$task) {
                 http_response_code(403);
-                echo json_encode([
-                    'status' => 403,
-                    'message' => 'Accès non autorisé'
-                ]);
+                echo json_encode(['error' => 'Accès non autorisé']);
                 exit;
             }
 
             // Mettre à jour la tâche
             $stmt = $pdo->prepare("
                 UPDATE tasks 
-                SET title = ?, description = ?, assigned_to = ?, due_date = ?, completed = ?
+                SET title = ?,
+                    description = ?,
+                    status = ?,
+                    priority = ?,
+                    due_date = ?,
+                    assigned_to = ?
                 WHERE id = ?
             ");
             $stmt->execute([
                 $data['title'],
-                $data['description'],
-                $data['assigned_to'],
-                $data['due_date'],
-                $data['completed'] ? 1 : 0,
-                $taskId
+                $data['description'] ?? null,
+                $data['status'] ?? 'à faire',
+                $data['priority'] ?? 'moyenne',
+                $data['due_date'] ?? null,
+                $data['assigned_to'] ?? null,
+                $data['id']
             ]);
 
-            echo json_encode([
-                'status' => 200,
-                'message' => 'Tâche mise à jour avec succès'
-            ]);
-        } catch (Exception $e) {
-            error_log('Erreur SQL: ' . $e->getMessage());
-            http_response_code(500);
-            echo json_encode([
-                'status' => 500,
-                'message' => 'Erreur lors de la mise à jour de la tâche'
-            ]);
-        }
-        break;
+            echo json_encode(['success' => true]);
+            break;
 
-    case 'DELETE':
-        $taskId = $_GET['id'] ?? null;
-        if (!$taskId) {
-            http_response_code(400);
-            echo json_encode([
-                'status' => 400,
-                'message' => 'ID de la tâche manquant'
-            ]);
-            exit;
-        }
+        case 'DELETE':
+            if (!isset($_GET['id'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'ID de la tâche manquant']);
+                exit;
+            }
 
-        try {
-            // Vérifier que l'utilisateur a accès à la tâche
+            // Vérifier l'accès à la tâche
             $stmt = $pdo->prepare("
-                SELECT t.* FROM tasks t
+                SELECT t.project_id 
+                FROM tasks t
                 JOIN project_members pm ON t.project_id = pm.project_id
-                WHERE t.id = ? AND pm.user_id = ? AND pm.role = 'owner'
+                WHERE t.id = ? AND pm.user_id = ?
             ");
-            $stmt->execute([$taskId, $userId]);
-            
+            $stmt->execute([$_GET['id'], $_SESSION['user_id']]);
             if (!$stmt->fetch()) {
                 http_response_code(403);
-                echo json_encode([
-                    'status' => 403,
-                    'message' => 'Accès non autorisé'
-                ]);
+                echo json_encode(['error' => 'Accès non autorisé']);
                 exit;
             }
 
             // Supprimer la tâche
             $stmt = $pdo->prepare("DELETE FROM tasks WHERE id = ?");
-            $stmt->execute([$taskId]);
+            $stmt->execute([$_GET['id']]);
 
-            echo json_encode([
-                'status' => 200,
-                'message' => 'Tâche supprimée avec succès'
-            ]);
-        } catch (Exception $e) {
-            error_log('Erreur SQL: ' . $e->getMessage());
-            http_response_code(500);
-            echo json_encode([
-                'status' => 500,
-                'message' => 'Erreur lors de la suppression de la tâche'
-            ]);
-        }
-        break;
+            echo json_encode(['success' => true]);
+            break;
 
-    default:
-        http_response_code(405);
-        echo json_encode([
-            'status' => 405,
-            'message' => 'Méthode non autorisée'
-        ]);
-        break;
+        default:
+            http_response_code(405);
+            echo json_encode(['error' => 'Méthode non autorisée']);
+            break;
+    }
+} catch (PDOException $e) {
+    error_log($e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'Erreur serveur']);
 } 

@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS events (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     date DATETIME NOT NULL,
-    type ENUM('design', 'development', 'marketing', 'meeting', 'deadline') NOT NULL,
+    type ENUM('meeting', 'deadline', 'reminder', 'other') DEFAULT 'other',
     creator_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -1,213 +1,125 @@
 <?php
-session_start();
-require_once '../config/database.php';
-
 header('Content-Type: application/json');
+session_start();
 
-// Vérifier l'authentification
+require_once 'db_connect.php';
+
+// Vérification de l'authentification
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode([
-        'status' => 401,
-        'message' => 'Non authentifié'
-    ]);
+    echo json_encode(['error' => 'Non authentifié']);
     exit;
 }
 
+// Récupération de la connexion à la base de données
+try {
+    $pdo = getConnection();
+} catch (PDOException $e) {
+    error_log("Erreur de connexion : " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'Erreur de connexion à la base de données']);
+    exit;
+}
+
+// Gestion des requêtes selon la méthode HTTP
 $method = $_SERVER['REQUEST_METHOD'];
-$userId = $_SESSION['user_id'];
 
 switch ($method) {
     case 'GET':
+        // Récupération de tous les projets de l'utilisateur
         try {
-            // Récupérer tous les projets de l'utilisateur
             $stmt = $pdo->prepare("
-                SELECT p.* 
+                SELECT p.*, 
+                    (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id) as tasks_count,
+                    (SELECT COUNT(*) FROM project_members pm WHERE pm.project_id = p.id) as members_count
                 FROM projects p
-                JOIN project_members pm ON p.id = pm.project_id
-                WHERE pm.user_id = ?
+                WHERE p.user_id = ?
                 ORDER BY p.created_at DESC
             ");
-            $stmt->execute([$userId]);
-            $projects = $stmt->fetchAll();
-
-            echo json_encode([
-                'status' => 200,
-                'projects' => $projects
-            ]);
-        } catch (Exception $e) {
-            error_log('Erreur SQL: ' . $e->getMessage());
+            $stmt->execute([$_SESSION['user_id']]);
+            $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            echo json_encode($projects);
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération des projets : " . $e->getMessage());
             http_response_code(500);
-            echo json_encode([
-                'status' => 500,
-                'message' => 'Erreur lors de la récupération des projets'
-            ]);
+            echo json_encode(['error' => 'Erreur lors de la récupération des projets']);
         }
         break;
 
     case 'POST':
+        // Création d'un nouveau projet
         $data = json_decode(file_get_contents('php://input'), true);
-
-        if (empty($data['title'])) {
+        
+        if (!isset($data['title']) || empty($data['title'])) {
             http_response_code(400);
-            echo json_encode([
-                'status' => 400,
-                'message' => 'Le titre est requis'
-            ]);
+            echo json_encode(['error' => 'Le titre est requis']);
             exit;
         }
 
         try {
-            $pdo->beginTransaction();
-
-            // Créer le projet
             $stmt = $pdo->prepare("
-                INSERT INTO projects (title, description, status) 
-                VALUES (?, ?, ?)
+                INSERT INTO projects (title, description, status, user_id, created_at)
+                VALUES (?, ?, ?, ?, NOW())
             ");
             $stmt->execute([
                 $data['title'],
                 $data['description'] ?? '',
-                $data['status'] ?? 'en_cours'
+                $data['status'] ?? 'en cours',
+                $_SESSION['user_id']
             ]);
+            
             $projectId = $pdo->lastInsertId();
-
-            // Ajouter l'utilisateur comme propriétaire du projet
-            $stmt = $pdo->prepare("
-                INSERT INTO project_members (project_id, user_id, role)
-                VALUES (?, ?, 'owner')
-            ");
-            $stmt->execute([$projectId, $userId]);
-
-            $pdo->commit();
-
-            http_response_code(201);
+            
             echo json_encode([
-                'status' => 201,
+                'success' => true,
                 'message' => 'Projet créé avec succès',
-                'project_id' => $projectId
+                'id' => $projectId
             ]);
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            error_log('Erreur SQL: ' . $e->getMessage());
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la création du projet : " . $e->getMessage());
             http_response_code(500);
-            echo json_encode([
-                'status' => 500,
-                'message' => 'Erreur lors de la création du projet'
-            ]);
-        }
-        break;
-
-    case 'PUT':
-        $projectId = $_GET['id'] ?? null;
-        if (!$projectId) {
-            http_response_code(400);
-            echo json_encode([
-                'status' => 400,
-                'message' => 'ID du projet manquant'
-            ]);
-            exit;
-        }
-
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        try {
-            // Vérifier que l'utilisateur a les droits sur le projet
-            $stmt = $pdo->prepare("
-                SELECT role FROM project_members 
-                WHERE project_id = ? AND user_id = ?
-            ");
-            $stmt->execute([$projectId, $userId]);
-            $member = $stmt->fetch();
-
-            if (!$member || $member['role'] !== 'owner') {
-                http_response_code(403);
-                echo json_encode([
-                    'status' => 403,
-                    'message' => 'Accès non autorisé'
-                ]);
-                exit;
-            }
-
-            // Mettre à jour le projet
-            $stmt = $pdo->prepare("
-                UPDATE projects 
-                SET title = ?, description = ?, status = ?
-                WHERE id = ?
-            ");
-            $stmt->execute([
-                $data['title'],
-                $data['description'],
-                $data['status'],
-                $projectId
-            ]);
-
-            echo json_encode([
-                'status' => 200,
-                'message' => 'Projet mis à jour avec succès'
-            ]);
-        } catch (Exception $e) {
-            error_log('Erreur SQL: ' . $e->getMessage());
-            http_response_code(500);
-            echo json_encode([
-                'status' => 500,
-                'message' => 'Erreur lors de la mise à jour du projet'
-            ]);
+            echo json_encode(['error' => 'Erreur lors de la création du projet']);
         }
         break;
 
     case 'DELETE':
-        $projectId = $_GET['id'] ?? null;
-        if (!$projectId) {
+        // Suppression d'un projet
+        if (!isset($_GET['id'])) {
             http_response_code(400);
-            echo json_encode([
-                'status' => 400,
-                'message' => 'ID du projet manquant'
-            ]);
+            echo json_encode(['error' => 'ID du projet non spécifié']);
             exit;
         }
 
         try {
-            // Vérifier que l'utilisateur a les droits sur le projet
-            $stmt = $pdo->prepare("
-                SELECT role FROM project_members 
-                WHERE project_id = ? AND user_id = ?
-            ");
-            $stmt->execute([$projectId, $userId]);
-            $member = $stmt->fetch();
+            // Vérifier que l'utilisateur est propriétaire du projet
+            $stmt = $pdo->prepare("SELECT user_id FROM projects WHERE id = ?");
+            $stmt->execute([$_GET['id']]);
+            $project = $stmt->fetch();
 
-            if (!$member || $member['role'] !== 'owner') {
+            if (!$project || $project['user_id'] != $_SESSION['user_id']) {
                 http_response_code(403);
-                echo json_encode([
-                    'status' => 403,
-                    'message' => 'Accès non autorisé'
-                ]);
+                echo json_encode(['error' => 'Non autorisé']);
                 exit;
             }
 
             // Supprimer le projet
-            $stmt = $pdo->prepare("DELETE FROM projects WHERE id = ?");
-            $stmt->execute([$projectId]);
-
+            $stmt = $pdo->prepare("DELETE FROM projects WHERE id = ? AND user_id = ?");
+            $stmt->execute([$_GET['id'], $_SESSION['user_id']]);
+            
             echo json_encode([
-                'status' => 200,
+                'success' => true,
                 'message' => 'Projet supprimé avec succès'
             ]);
-        } catch (Exception $e) {
-            error_log('Erreur SQL: ' . $e->getMessage());
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la suppression du projet : " . $e->getMessage());
             http_response_code(500);
-            echo json_encode([
-                'status' => 500,
-                'message' => 'Erreur lors de la suppression du projet'
-            ]);
+            echo json_encode(['error' => 'Erreur lors de la suppression du projet']);
         }
         break;
 
     default:
         http_response_code(405);
-        echo json_encode([
-            'status' => 405,
-            'message' => 'Méthode non autorisée'
-        ]);
+        echo json_encode(['error' => 'Méthode non autorisée']);
         break;
 } 
